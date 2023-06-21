@@ -48,8 +48,8 @@ afterEvaluate{
             release(MavenPublication){
                 from components.release
                 groupId = 'com.device.deviceinformationlibrary'
-                artifactId = 'device_information'
-                version= "1.0"
+                artifactId = 'com.device.deviceinformationlibrary'
+                version= "1.1"
             }
         }
     }
