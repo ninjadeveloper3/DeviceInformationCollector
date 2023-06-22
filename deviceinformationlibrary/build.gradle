@@ -4,8 +4,6 @@ plugins {
     id 'maven-publish'
 
 }
-
-
 android {
     namespace 'com.device.deviceinformationlibrary'
     compileSdk 33
