@@ -1,30 +1,39 @@
 package com.device.deviceinformationlibrary
 
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.WallpaperManager
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.location.Address
+import android.location.Geocoder
+import android.location.Location
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
-import android.os.Build
-import android.os.Environment
-import android.os.Process
-import android.os.StatFs
+import android.os.*
 import android.provider.MediaStore
 import android.provider.Settings
+import android.util.DisplayMetrics
 import android.util.Log
+import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.gms.location.FusedLocationProviderClient
 import java.io.*
 import java.net.Inet4Address
 import java.net.NetworkInterface
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -187,263 +196,403 @@ object DataCollection {
         return null
     }
 
-}
+    // detect dark mode or light mode
+    fun isDarkMode(context: Context): Boolean {
+        val currentNightMode =
+            context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        return currentNightMode == Configuration.UI_MODE_NIGHT_YES
+    }
 
-// detect dark mode or light mode
-fun isDarkMode(context: Context): Boolean {
-    val currentNightMode =
-        context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-    return currentNightMode == Configuration.UI_MODE_NIGHT_YES
-}
+    // total internal storage of device
+    fun getTotalInternalStorage(): Long {
+        val path = Environment.getDataDirectory()
+        val stat = StatFs(path.path)
+        val blockSize = stat.blockSizeLong
+        val totalBlocks = stat.blockCountLong
+        val totalInGb = totalBlocks * blockSize
+        val totalInternalStorage = totalInGb / (1024 * 1024 * 1024)
+        return totalInternalStorage
 
-// total internal storage of device
-fun getTotalInternalStorage(): Long {
-    val path = Environment.getDataDirectory()
-    val stat = StatFs(path.path)
-    val blockSize = stat.blockSizeLong
-    val totalBlocks = stat.blockCountLong
-    val totalInGb = totalBlocks * blockSize
-    val totalInternalStorage = totalInGb / (1024 * 1024 * 1024)
-    return totalInternalStorage
-
-}
+    }
 
 
 // get total external storage
 
-fun getTotalExternalStorageSizeInGB(): Long {
-    val externalStorageDirectory = Environment.getExternalStorageDirectory()
-    val statFs = StatFs(externalStorageDirectory.path)
+    fun getTotalExternalStorageSizeInGB(): Long {
+        val externalStorageDirectory = Environment.getExternalStorageDirectory()
+        val statFs = StatFs(externalStorageDirectory.path)
 
-    val blockSize = statFs.blockSizeLong
-    val totalBlocks = statFs.blockCountLong
+        val blockSize = statFs.blockSizeLong
+        val totalBlocks = statFs.blockCountLong
 
-    val totalBytes = blockSize * totalBlocks
-    val totalGB = totalBytes / (1024 * 1024 * 1024) // Convert bytes to GB
+        val totalBytes = blockSize * totalBlocks
+        val totalGB = totalBytes / (1024 * 1024 * 1024) // Convert bytes to GB
 
-    return totalGB
-}
+        return totalGB
+    }
 
 
-// this function  return the almost exact size
+    // this function  return the almost exact size
 // Ram size
-fun getTotalPhysicalMemory(): String? {
-    var reader: RandomAccessFile? = null
-    var load: String? = null
-    val twoDecimalForm = DecimalFormat("#.##")
-    var totRam = 0.0
-    var lastValue = ""
-    try {
-        reader = RandomAccessFile("/proc/meminfo", "r")
-        load = reader.readLine()
+    fun getTotalPhysicalMemory(): String? {
+        var reader: RandomAccessFile? = null
+        var load: String? = null
+        val twoDecimalForm = DecimalFormat("#.##")
+        var totRam = 0.0
+        var lastValue = ""
+        try {
+            reader = RandomAccessFile("/proc/meminfo", "r")
+            load = reader.readLine()
 
-        // Get the Number value from the string
-        val p: Pattern = Pattern.compile("(\\d+)")
-        val m: Matcher = p.matcher(load)
-        var value = ""
+            // Get the Number value from the string
+            val p: Pattern = Pattern.compile("(\\d+)")
+            val m: Matcher = p.matcher(load)
+            var value = ""
 
-        while (m.find()) {
-            value = m.group(1)
-            // System.out.println("Ram : " + value);
+            while (m.find()) {
+                value = m.group(1)
+                // System.out.println("Ram : " + value);
+            }
+
+            reader.close()
+            totRam = value.toDouble()
+            // totRam = totRam / 1024;
+            val mb = totRam / 1024.0
+            val gb = totRam / 1048576.0
+            val tb = totRam / 1073741824.0
+            lastValue = if (tb > 1) {
+                twoDecimalForm.format(tb) + (" TB")
+            } else if (gb > 1) {
+                twoDecimalForm.format(gb) + (" GB")
+            } else if (mb > 1) {
+                twoDecimalForm.format(mb) + (" MB")
+            } else {
+                twoDecimalForm.format(totRam) + (" KB")
+            }
+        } catch (ex: IOException) {
+            ex.printStackTrace()
+        } finally {
+            // Streams.close(reader);
         }
+        return lastValue
+    }
 
-        reader.close()
-        totRam = value.toDouble()
-        // totRam = totRam / 1024;
-        val mb = totRam / 1024.0
-        val gb = totRam / 1048576.0
-        val tb = totRam / 1073741824.0
-        lastValue = if (tb > 1) {
-            twoDecimalForm.format(tb) + (" TB")
-        } else if (gb > 1) {
-            twoDecimalForm.format(gb) + (" GB")
-        } else if (mb > 1) {
-            twoDecimalForm.format(mb) + (" MB")
+    // check Vpn is enabled or not
+    fun isVpnEnabled(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val connectivityManager =
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val activeNetwork = connectivityManager.activeNetwork
+            val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
+
+            return networkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) ?: false
         } else {
-            twoDecimalForm.format(totRam) + (" KB")
-        }
-    } catch (ex: IOException) {
-        ex.printStackTrace()
-    } finally {
-        // Streams.close(reader);
-    }
-    return lastValue
-}
-
-// check Vpn is enabled or not
-fun isVpnEnabled(context: Context): Boolean {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork = connectivityManager.activeNetwork
-        val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
-
-        return networkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) ?: false
-    } else {
-        val connectivityService =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val iConnectivityManagerClass = Class.forName(connectivityService.javaClass.name)
-        val iConnectivityManagerField = iConnectivityManagerClass.getDeclaredField("mService")
-        iConnectivityManagerField.isAccessible = true
-        val iConnectivityManager = iConnectivityManagerField.get(connectivityService)
-        val iConnectivityManagerClassStub = Class.forName(iConnectivityManager.javaClass.name)
-        val getVpnConfigMethod = iConnectivityManagerClassStub.getDeclaredMethod("getVpnConfig")
-        getVpnConfigMethod.isAccessible = true
-        val vpnConfig = getVpnConfigMethod.invoke(iConnectivityManager)
-        return vpnConfig != null
-    }
-}
-
-// get screen time off
-fun getScreenOffTimeout(context: Context): Long {
-    return try {
-        // Get the current screen timeout duration
-        val timeout = Settings.System.getLong(
-            context.contentResolver,
-            Settings.System.SCREEN_OFF_TIMEOUT
-        )
-        // Convert milliseconds to seconds
-        timeout / 1000
-    } catch (e: Exception) {
-        e.printStackTrace()
-        // Handle exception if necessary
-        -1L
-    }
-}
-
-// check if devices rooted or not
-fun isRooted(): Boolean {
-    val path = System.getenv("PATH")
-    val places = path.split(":")
-    for (place in places) {
-        val file = File(place, "su")
-        if (file.exists()) {
-            return true
+            val connectivityService =
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val iConnectivityManagerClass = Class.forName(connectivityService.javaClass.name)
+            val iConnectivityManagerField = iConnectivityManagerClass.getDeclaredField("mService")
+            iConnectivityManagerField.isAccessible = true
+            val iConnectivityManager = iConnectivityManagerField.get(connectivityService)
+            val iConnectivityManagerClassStub = Class.forName(iConnectivityManager.javaClass.name)
+            val getVpnConfigMethod = iConnectivityManagerClassStub.getDeclaredMethod("getVpnConfig")
+            getVpnConfigMethod.isAccessible = true
+            val vpnConfig = getVpnConfigMethod.invoke(iConnectivityManager)
+            return vpnConfig != null
         }
     }
-    return false
-}
 
-// second Method to check that device is rooted or not
+    // get screen time off
+    fun getScreenOffTimeout(context: Context): Long {
+        return try {
+            // Get the current screen timeout duration
+            val timeout = Settings.System.getLong(
+                context.contentResolver,
+                Settings.System.SCREEN_OFF_TIMEOUT
+            )
+            // Convert milliseconds to seconds
+            timeout / 1000
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Handle exception if necessary
+            -1L
+        }
+    }
+
+    // check if devices rooted or not
+    fun isRooted(): Boolean {
+        val path = System.getenv("PATH")
+        val places = path.split(":")
+        for (place in places) {
+            val file = File(place, "su")
+            if (file.exists()) {
+                return true
+            }
+        }
+        return false
+    }
+
+    // second Method to check that device is rooted or not
 // these for some device whose not like that regular devices
 //Please note that these methods are not foolproof,
 //as rooted devices can use various techniques to hide their status.
 //These approaches can provide a preliminary indication, but it's not guaranteed to be 100% accurate.
-fun isDeviceRooted(): Boolean {
-    val knownRootFileSystems =
-        arrayListOf("/sbin/su", "/system/su", "/system/bin/su", "/system/xbin/su")
-    for (filePath in knownRootFileSystems) {
-        val file = File(filePath)
-        if (file.exists()) {
-            return true
+    fun isDeviceRooted(): Boolean {
+        val knownRootFileSystems =
+            arrayListOf("/sbin/su", "/system/su", "/system/bin/su", "/system/xbin/su")
+        for (filePath in knownRootFileSystems) {
+            val file = File(filePath)
+            if (file.exists()) {
+                return true
+            }
         }
+        return false
     }
-    return false
-}
 
-// number of cores of the device cpu
-fun getNumberOfCores(): Int {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        Runtime.getRuntime().availableProcessors()
-    } else {
-        // For older devices, use a different method to get the number of cores
-        try {
-            val file = File("/sys/devices/system/cpu/")
-            val files = file.listFiles { _, name -> name.startsWith("cpu") }
-            files.size
-        } catch (e: Exception) {
+    // number of cores of the device cpu
+    fun getNumberOfCores(): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Runtime.getRuntime().availableProcessors()
-            Log.d("exceptionMessage", e.message.toString())
+        } else {
+            // For older devices, use a different method to get the number of cores
+            try {
+                val file = File("/sys/devices/system/cpu/")
+                val files = file.listFiles { _, name -> name.startsWith("cpu") }
+                files.size
+            } catch (e: Exception) {
+                Runtime.getRuntime().availableProcessors()
+                Log.d("exceptionMessage", e.message.toString())
+            }
         }
     }
-}
 
 //indicate device is possible emulator or not
 
-fun isEmulator(): Boolean {
-    return (Build.FINGERPRINT.contains("generic")
-            || Build.MODEL.contains("google_sdk")
-            || Build.MODEL.contains("Emulator")
-            || Build.MODEL.contains("Android SDK built for x86")
-            || Build.MANUFACTURER.contains("Genymotion")
-            || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
-            || "google_sdk" == Build.PRODUCT)
-}
-
-
-// get device timezone offset
-fun getDeviceTimeZoneOffset(): Int {
-    val currentTimeZone = TimeZone.getDefault()
-    val offsetInMillis = currentTimeZone.getOffset(Calendar.getInstance().timeInMillis)
-    // convert offsetInMillis to hours
-    return offsetInMillis / (1000 * 60 * 60)
-}
-
-// Function to check if Auto Net selection is enabled
-fun isAutoNetSelectionEnabled(context: Context): Boolean {
-    val connectivityManager =
-        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-    // Check if the device is running on Android Q or higher
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val networkCapabilities =
-            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-        return networkCapabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED) == true
+    fun isEmulator(): Boolean {
+        return (Build.FINGERPRINT.contains("generic")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || "google_sdk" == Build.PRODUCT)
     }
 
-    // Auto Net selection not applicable for Android versions below Q
-    return false
-}
 
-// check permission function
-// Check if the app has the necessary permissions to access the Wi-Fi state
-private fun hasPermission(context: Activity, permission: String): Boolean {
-    return ContextCompat.checkSelfPermission(
-        context,
-        permission
-    ) == PackageManager.PERMISSION_GRANTED
-}
+    // get device timezone offset
+    fun getDeviceTimeZoneOffset(): Int {
+        val currentTimeZone = TimeZone.getDefault()
+        val offsetInMillis = currentTimeZone.getOffset(Calendar.getInstance().timeInMillis)
+        // convert offsetInMillis to hours
+        return offsetInMillis / (1000 * 60 * 60)
+    }
 
-// Get the MAC address of the Wi-Fi hardware
-fun getMacAddress(context: Context): String? {
-    val wifiManager =
-        context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+    // Function to check if Auto Net selection is enabled
+    fun isAutoNetSelectionEnabled(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    // Check if the app has the necessary permissions
-    if (hasPermission(context as Activity, android.Manifest.permission.ACCESS_WIFI_STATE)) {
-        val wifiInfo: WifiInfo? = wifiManager.connectionInfo
-        if (wifiInfo != null) {
-            return wifiInfo.macAddress
+        // Check if the device is running on Android Q or higher
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val networkCapabilities =
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            return networkCapabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED) == true
         }
-    } else {
-        // Request the necessary permissions if not granted
-        ActivityCompat.requestPermissions(
+
+        // Auto Net selection not applicable for Android versions below Q
+        return false
+    }
+
+    // check permission function
+// Check if the app has the necessary permissions to access the Wi-Fi state
+    private fun hasPermission(context: Activity, permission: String): Boolean {
+        return ContextCompat.checkSelfPermission(
             context,
-            arrayOf(android.Manifest.permission.ACCESS_WIFI_STATE),
-            1
-        )
+            permission
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
-    return null
-}
+    // Get the MAC address of the Wi-Fi hardware
+    fun getMacAddress(context: Context): String? {
+        val wifiManager =
+            context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-// check closed captioning enabled or not
-fun isClosedCaptioningEnabled(context: Context): Boolean {
-    val captioningManager =
-        context.getSystemService(Context.CAPTIONING_SERVICE) as android.view.accessibility.CaptioningManager
+        // Check if the app has the necessary permissions
+        if (hasPermission(context as Activity, android.Manifest.permission.ACCESS_WIFI_STATE)) {
+            val wifiInfo: WifiInfo? = wifiManager.connectionInfo
+            if (wifiInfo != null) {
+                return wifiInfo.macAddress
+            }
+        } else {
+            // Request the necessary permissions if not granted
+            ActivityCompat.requestPermissions(
+                context,
+                arrayOf(android.Manifest.permission.ACCESS_WIFI_STATE),
+                1
+            )
+        }
 
-    return captioningManager.isEnabled
-}
-
-
-// check talk back option enabled or not
-fun Context.isScreenReaderOn(): Boolean {
-    val am = getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
-    if (am != null && am.isEnabled) {
-        val serviceInfoList =
-            am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_SPOKEN)
-        if (!serviceInfoList.isEmpty())
-            return true
+        return null
     }
-    return false
+
+    // check closed captioning enabled or not
+    fun isClosedCaptioningEnabled(context: Context): Boolean {
+        val captioningManager =
+            context.getSystemService(Context.CAPTIONING_SERVICE) as android.view.accessibility.CaptioningManager
+
+        return captioningManager.isEnabled
+    }
+
+
+    // check talk back option enabled or not
+    fun Context.isScreenReaderOn(): Boolean {
+        val am = getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+        if (am != null && am.isEnabled) {
+            val serviceInfoList =
+                am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_SPOKEN)
+            if (!serviceInfoList.isEmpty())
+                return true
+        }
+        return false
+    }
+
+
+    // get last boot time of device
+    fun getBootTime(format: String): String {
+
+        // Get the system boot time.
+        val bootTime = System.currentTimeMillis() - SystemClock.elapsedRealtime()
+
+        // Format the boot time.
+        val formattedBootTime = SimpleDateFormat(format).format(Date(bootTime))
+
+        // Return the formatted boot time.
+        return formattedBootTime
+    }
+
+
+// check color invision enabled
+    /** Color Inversion */
+    fun isColorInversionEnabled(context: Context): Boolean? {
+        return try {
+            Settings.Secure.getInt(
+                context.contentResolver,
+                "accessibility_display_inversion_enabled",
+                0
+            ) == 1
+        } catch (e: Exception) {
+            null
+        }
+
+    }
+
+
+    /** Alternative Id for IDFV (ios) */
+    fun generateUUID(): String {
+        val uuid: UUID = UUID.randomUUID()
+        return uuid.toString()
+    }
+
+    /** Device Language */
+    fun getDeviceLanguage(context: Context): String {
+
+        val locale: Locale = context.resources.configuration.locales[0]
+
+        return locale.language
+    }
+
+
+    /** Wifi SSID */
+    fun getWifiSSID(context: Context): String? {
+
+        val wifiManager =
+            context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val wifiInfo: WifiInfo? = wifiManager.connectionInfo
+
+        return wifiInfo?.ssid?.removeSurrounding("\"")
+    }
+
+    /** Device Width and Height*/
+    fun getDeviceWidthAndHeight(context: Context): Pair<Int, Int> {
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+
+        val widthPixels = displayMetrics.widthPixels
+        val heightPixels = displayMetrics.heightPixels
+
+        return Pair(widthPixels, heightPixels)
+    }
+
+
+    /** Keyboards List */
+    fun getInstalledKeyboards(context: Context): List<String> {
+        val inputMethodManager =
+            context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val inputMethodList = inputMethodManager.enabledInputMethodList
+
+        val installedKeyboards = mutableListOf<String>()
+        for (inputMethodInfo in inputMethodList) {
+            val packageName = inputMethodInfo.packageName
+            installedKeyboards.add(packageName)
+        }
+        return installedKeyboards
+    }
+
+
+    /** Kernel Version */
+    fun getKernelVersion(command: String): String {
+        var kernelVersion = ""
+        try {
+            val process = Runtime.getRuntime().exec(command)
+            val inputStream = process.inputStream
+            val bufferedReader = BufferedReader(InputStreamReader(inputStream))
+            kernelVersion = bufferedReader.readLine()
+            bufferedReader.close()
+            inputStream.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return kernelVersion
+    }
+
+    // calendar type of device
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getDeviceCalendarType(): String {
+        val calendar = Calendar.getInstance()
+        return calendar.getCalendarType()
+    }
+
+    fun deviceFontList(): Array<File> {
+        // return font list
+        val path = "/system/fonts"
+        val file = File(path)
+        val ff: Array<File> = file.listFiles()
+        return ff
+    }
+
+    // get location of device
+    @SuppressLint("MissingPermission", "SetTextI18n")
+     fun getLocation(context: Activity , mFusedLocationClient :FusedLocationProviderClient) :String {
+                var latitude:String?= null
+                var longitude:String?= null
+                var accuracy:String?= null
+
+                mFusedLocationClient.lastLocation.addOnCompleteListener(context) { task ->
+                    val location: Location? = task.result
+                    if (location != null) {
+                        val geocoder = Geocoder(context, Locale.getDefault())
+
+                         latitude =    location.latitude.toString()
+                         longitude=  location.longitude.toString()
+                         accuracy  = location.accuracy.toString()
+
+
+                    }
+            }
+
+          return "latitude: $latitude,  longitude: $longitude, accuracy: $accuracy"
+    }
+
+
 }
+
