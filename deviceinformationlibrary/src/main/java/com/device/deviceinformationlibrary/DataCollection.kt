@@ -105,7 +105,7 @@ object DataCollection {
     }
 
     // ipv4 ip address
-    fun getAddress(): String {
+    fun getIpAddress(): String {
         NetworkInterface.getNetworkInterfaces()?.toList()?.map { networkInterface ->
             networkInterface.inetAddresses?.toList()?.find {
                 !it.isLoopbackAddress && it is Inet4Address
