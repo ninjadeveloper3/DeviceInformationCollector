@@ -7,6 +7,7 @@ import android.view.Surface
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.device.deviceinformationlibrary.DataCollection
+import com.device.informationcollector.contact.ContactListActivity
 import com.device.informationcollector.databinding.ActivityMainBinding
 import com.device.informationcollector.dialog.DialogUtils
 import com.device.informationcollector.font.FontListActivity
@@ -44,6 +45,11 @@ class MainActivity : AppCompatActivity() {
         }
         binding.top50songsList.setOnClickListener {
             val intent = Intent(this, Top50MusicListActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.contactList.setOnClickListener {
+            val intent= Intent(this, ContactListActivity::class.java)
             startActivity(intent)
         }
     }
