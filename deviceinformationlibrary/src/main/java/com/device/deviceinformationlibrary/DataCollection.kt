@@ -3,13 +3,12 @@ package com.device.deviceinformationlibrary
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ActivityManager
 import android.app.WallpaperManager
 import android.content.ContentResolver
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.net.ConnectivityManager
@@ -19,12 +18,12 @@ import android.net.wifi.WifiManager
 import android.os.*
 import android.provider.MediaStore
 import android.provider.Settings
+import android.telephony.TelephonyManager
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -444,17 +443,16 @@ object DataCollection {
 
 
     // check talk back option enabled or not
-    fun Context.isScreenReaderOn(): Boolean {
-        val am = getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
-        if (am != null && am.isEnabled) {
-            val serviceInfoList =
-                am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_SPOKEN)
-            if (!serviceInfoList.isEmpty())
-                return true
-        }
-        return false
-    }
-
+//    fun Context.isScreenReaderOn(): Boolean {
+//        val am = getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+//        if (am != null && am.isEnabled) {
+//            val serviceInfoList =
+//                am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_SPOKEN)
+//            if (!serviceInfoList.isEmpty())
+//                return true
+//        }
+//        return false
+//    }
 
     // get last boot time of device
     fun getBootTime(format: String): String {
@@ -591,6 +589,77 @@ object DataCollection {
             }
 
           return "latitude: $latitude,  longitude: $longitude, accuracy: $accuracy"
+    }
+
+    // Kernel Arch
+    fun kernelArchitecture(): String {
+        val kernelArchitecture = System.getProperty("os.arch")
+        return kernelArchitecture
+    }
+
+    // device orientation
+    fun deviceOrientation(context: Context): Int {
+        // get screen orientation second method
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val display = windowManager.getDefaultDisplay()
+
+        val rotation = display.getRotation()
+        return rotation
+    }
+    // auto timezone enabled or not
+    fun autoTimeZoneEnabled(context: Context):String{
+        val autoTimeZoneSettings =
+            Settings.Global.getString(context.contentResolver, Settings.Global.AUTO_TIME_ZONE)
+        return autoTimeZoneSettings
+    }
+    // Function to check if the device is connected to a Wi-Fi network
+    fun isWifiConnected(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ?: false
+    }
+    // check talk back option enabled or not
+    fun isScreenReaderOn(context: Context): Boolean {
+        val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+        if (am != null && am.isEnabled) {
+            val serviceInfoList =
+                am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_SPOKEN)
+            if (!serviceInfoList.isEmpty())
+                return true
+        }
+        return false
+    }
+
+    // device Model
+    fun deviceModel() : String{
+        val deviceModel = Build.MODEL
+        return deviceModel
+    }
+    // for getting career name
+     fun getAndDisplayCarrierName(context: Context): String {
+        val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        return telephonyManager.networkOperatorName
+    }
+
+    // get country name
+    fun countryName(context: Context): String {
+        val country = context.resources.configuration.locale.country
+        return country
+    }
+
+    // cpu Type
+    fun cpuType(): String {
+        val cpuType = Build.CPU_ABI
+        return cpuType
+    }
+    // check if Apppinned
+     fun isAppPinned(context: Context) : Boolean{
+        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val pinned = activityManager.lockTaskModeState
+        val isPinned = pinned != 0
+        return isPinned
     }
 
 
