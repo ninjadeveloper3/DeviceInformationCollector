@@ -10,6 +10,7 @@ import com.device.deviceinformationlibrary.DataCollection
 import com.device.informationcollector.databinding.ActivityMainBinding
 import com.device.informationcollector.dialog.DialogUtils
 import com.device.informationcollector.font.FontListActivity
+import com.device.informationcollector.music.Top50MusicListActivity
 import com.device.informationcollector.permission.PermissionCheckers
 
 class MainActivity : AppCompatActivity() {
@@ -39,6 +40,10 @@ class MainActivity : AppCompatActivity() {
     private fun initClick() {
         binding.listOfAvailableFonts.setOnClickListener {
             val intent = Intent(this, FontListActivity::class.java)
+            startActivity(intent)
+        }
+        binding.top50songsList.setOnClickListener {
+            val intent = Intent(this, Top50MusicListActivity::class.java)
             startActivity(intent)
         }
     }

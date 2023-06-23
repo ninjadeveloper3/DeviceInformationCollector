@@ -16,6 +16,7 @@ import android.net.NetworkCapabilities
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.*
+import android.provider.ContactsContract
 import android.provider.MediaStore
 import android.provider.Settings
 import android.telephony.TelephonyManager
@@ -27,6 +28,8 @@ import android.view.inputmethod.InputMethodManager
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.device.deviceinformationlibrary.models.Contact
+import com.device.deviceinformationlibrary.models.MusicSong
 import com.google.android.gms.location.FusedLocationProviderClient
 import java.io.*
 import java.net.Inet4Address
@@ -661,6 +664,92 @@ object DataCollection {
         val pinned = activityManager.lockTaskModeState
         val isPinned = pinned != 0
         return isPinned
+    }
+
+    // get list of user's music collection
+    fun getMusicCollection(context: Context): MutableList<MusicSong> {
+        val musicCollection = mutableListOf<MusicSong>()
+        val contentResolver: ContentResolver = context.contentResolver
+
+        val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        val projection = arrayOf(MediaStore.Audio.Media.TITLE)
+
+        val cursor = contentResolver.query(uri, projection, null, null, null)
+
+        cursor?.use {
+            val titleColumn = it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
+            while (it.moveToNext()) {
+                val title = it.getString(titleColumn)
+                musicCollection.add(MusicSong(title))
+            }
+        }
+
+        cursor?.close()
+
+        return musicCollection
+    }
+
+    // get top 50 most played songs
+    fun getTop50MostPlayedSongs(musicCollection: MutableList<MusicSong>): List<MusicSong> {
+
+        // Create a map to store the number of times each song has been played.
+        val playedCounts = mutableMapOf<MusicSong, Int>()
+
+        // Iterate over the music collection and increment the number of times each song has been played.
+        for (song in musicCollection) {
+            playedCounts[song] = playedCounts.getOrDefault(song, 0) + 1
+        }
+
+        // Sort the map by the number of times each song has been played.
+        val sortedPlayedCounts = playedCounts.toSortedMap(compareBy { it.title })
+
+        // Get the top 50 songs.
+        val top50Songs = sortedPlayedCounts.entries.take(50).map { it.key }
+
+        return top50Songs
+    }
+
+    // retrieve device Contacts
+     fun deviceContactsList(context: Context) : MutableList<Contact> {
+        val contactsList = mutableListOf<Contact>()
+
+        // Set up the contact query
+        val projection = arrayOf(
+            ContactsContract.Contacts.DISPLAY_NAME,
+            ContactsContract.CommonDataKinds.Phone.NUMBER
+        )
+        val selection = null
+        val selectionArgs = null
+        val sortOrder = null
+
+        // Perform the query
+        val cursor = context.contentResolver.query(
+            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            sortOrder
+        )
+
+        cursor?.use { cursor ->
+            val nameColumnIndex =
+                cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
+            val phoneColumnIndex =
+                cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+
+            while (cursor.moveToNext()) {
+                val name = cursor.getString(nameColumnIndex)
+                val phoneNumber = cursor.getString(phoneColumnIndex)
+
+                val contact = Contact(name, phoneNumber)
+                contactsList.add(contact)
+            }
+        }
+
+
+        // Close the cursor after use
+        cursor?.close()
+        return contactsList
     }
 
 
