@@ -560,6 +560,7 @@ object DataCollection {
         return calendar.getCalendarType()
     }
 
+// list of device font
     fun deviceFontList(): Array<File> {
         // return font list
         val path = "/system/fonts"

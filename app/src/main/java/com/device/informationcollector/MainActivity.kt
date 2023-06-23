@@ -1,19 +1,22 @@
 package com.device.informationcollector
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.provider.ContactsContract.Data
 import android.view.Surface
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.device.deviceinformationlibrary.DataCollection
 import com.device.informationcollector.databinding.ActivityMainBinding
 import com.device.informationcollector.dialog.DialogUtils
+import com.device.informationcollector.font.FontListActivity
 import com.device.informationcollector.permission.PermissionCheckers
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var permissionCheckers: PermissionCheckers
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -21,15 +24,24 @@ class MainActivity : AppCompatActivity() {
 
         initViews()
         setViews()
+        initClick()
 
     }
 
     private fun initViews() {
+
         permissionCheckers = PermissionCheckers(this)
         initFineLocationPermission()
         initPhoneStatePermission()
+
     }
 
+    private fun initClick() {
+        binding.listOfAvailableFonts.setOnClickListener {
+            val intent = Intent(this, FontListActivity::class.java)
+            startActivity(intent)
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun setViews() {
@@ -216,15 +228,15 @@ class MainActivity : AppCompatActivity() {
         binding.calendarTypeValue.text = calendarType
 
         /** AppPineed */
-        val isAppPinned= DataCollection.isAppPinned(this)
-        if(isAppPinned){
+        val isAppPinned = DataCollection.isAppPinned(this)
+        if (isAppPinned) {
             binding.tvAppPinnedValue.text = getString(R.string.app_pined)
-        }
-        else{
+        } else {
             binding.tvAppPinnedValue.text = getString(R.string.app_not_pinned)
         }
 
     }
+
 
     private fun initFineLocationPermission() {
         if (permissionCheckers.isPermissionGranted(PermissionCheckers.FINE_LOCATION)) {
