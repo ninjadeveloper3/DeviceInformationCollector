@@ -36,7 +36,9 @@ implementation project(path: ':deviceinformationlibrary')
 
 
 
-#output
+#Output
+
+
 ![WhatsApp Image 2023-06-26 at 3 02 55 PM](https://github.com/ninjadeveloper3/DeviceInformationCollector/assets/115450012/b3fb06e0-0429-4cb6-b0ee-2cb12b36ae64)
 
 
