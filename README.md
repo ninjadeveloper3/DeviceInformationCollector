@@ -41,6 +41,7 @@ device data collector
 
 
 
+# How to integrate library in your project
 
 -> Step 1. Add the JitPack repository to your build file
 
