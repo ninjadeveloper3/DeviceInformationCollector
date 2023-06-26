@@ -59,12 +59,12 @@ afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
-                groupId = 'com.device.deviceinformationlibrary'
-                artifactId = 'sample'
-                version = "1.0"
+                groupId = 'com.github.ninjadeveloper3'
+                artifactId = 'device_information_collector'
+                version = "1.8.0"
                 from components.release
                 pom {
-                    description = 'A description of my library'
+                    description = 'data collection library'
                 }
             }
         }
