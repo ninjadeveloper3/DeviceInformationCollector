@@ -59,9 +59,9 @@ afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
-                groupId = 'com.github.ninjadeveloper3'
+                groupId = 'comgithubNinjadeveloper3'
                 artifactId = 'device_information_collector'
-                version = "1.8.0"
+                version = "1.1.0"
                 from components.release
                 pom {
                     description = 'data collection library'
