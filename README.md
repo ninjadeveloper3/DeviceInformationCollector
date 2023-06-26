@@ -1,10 +1,10 @@
 # DeviceInformationCollector
-#Show Some Support 
 device data collector
-..............
-Step 1. Add the JitPack repository to your build file
 
-Add it in your root build.gradle at the end of repositories:
+
+-> Step 1. Add the JitPack repository to your build file
+
+-> Add it in your root build.gradle at the end of repositories:
 
 
 
@@ -20,7 +20,7 @@ allprojects
  ...............
 
 
- Step 2. Add the dependency
+ -> Step 2. Add the dependency
 
 
 implementation 'com.github.ninjadeveloper3:DeviceInformationCollector:Tag'
@@ -29,7 +29,7 @@ implementation 'com.github.ninjadeveloper3:DeviceInformationCollector:Tag'
 ..............
 
 
-import module by adding this line in dependencies
+-> import module by adding this line in dependencies
 
 
 implementation project(path: ':deviceinformationlibrary')
