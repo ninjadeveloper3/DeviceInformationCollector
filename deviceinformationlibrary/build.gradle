@@ -58,7 +58,7 @@ dependencies {
 afterEvaluate {
     publishing {
         publications {
-            maven(MavenPublication) {
+            release(MavenPublication) {
                 groupId = 'com.device.deviceinformationlibrary'
                 artifactId = 'sample'
                 version = "1.3"
