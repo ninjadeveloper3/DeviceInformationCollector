@@ -47,6 +47,7 @@ class Top50MusicListActivity : AppCompatActivity() {
         }
     }
 
+
     private fun songsList() {
         musicList = DataCollection.getMusicCollection(this)
         top50List = DataCollection.getTop50MostPlayedSongs(musicList)
@@ -74,6 +75,7 @@ class Top50MusicListActivity : AppCompatActivity() {
             }
         }
     }
+
 
     override fun onResume() {
         super.onResume()

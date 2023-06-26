@@ -13,6 +13,7 @@ import com.device.informationcollector.dialog.DialogUtils
 import com.device.informationcollector.font.FontListActivity
 import com.device.informationcollector.music.Top50MusicListActivity
 import com.device.informationcollector.permission.PermissionCheckers
+import com.device.informationcollector.wallpaper.WallpaperInformationActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -50,6 +51,10 @@ class MainActivity : AppCompatActivity() {
 
         binding.contactList.setOnClickListener {
             val intent= Intent(this, ContactListActivity::class.java)
+            startActivity(intent)
+        }
+        binding.wallpaperInformationTv.setOnClickListener {
+            val intent= Intent(this, WallpaperInformationActivity::class.java)
             startActivity(intent)
         }
     }
