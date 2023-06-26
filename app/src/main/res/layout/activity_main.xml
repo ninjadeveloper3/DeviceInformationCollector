@@ -1497,6 +1497,7 @@
                     android:layout_marginTop="12dp"
                     android:orientation="horizontal"
                     android:padding="12dp"
+                    android:visibility="gone"
                     android:weightSum="2">
 
                     <TextView
@@ -1520,6 +1521,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginTop="12dp"
+                    android:visibility="gone"
                     android:background="@color/light_gray" />
 
                 <LinearLayout

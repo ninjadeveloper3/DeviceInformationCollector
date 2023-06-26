@@ -574,25 +574,27 @@ object DataCollection {
 
     // get location of device
     @SuppressLint("MissingPermission", "SetTextI18n")
-     fun getLocation(context: Activity , mFusedLocationClient :FusedLocationProviderClient) :String {
+     fun getLocation(context: Activity , mFusedLocationClient :FusedLocationProviderClient)  {
                 var latitude:String?= null
                 var longitude:String?= null
                 var accuracy:String?= null
 
                 mFusedLocationClient.lastLocation.addOnCompleteListener(context) { task ->
                     val location: Location? = task.result
-                    if (location != null) {
-                        val geocoder = Geocoder(context, Locale.getDefault())
-
-                         latitude =    location.latitude.toString()
-                         longitude=  location.longitude.toString()
-                         accuracy  = location.accuracy.toString()
-
-
-                    }
+                    return@addOnCompleteListener
+//                    if (location != null) {
+//                        val geocoder = Geocoder(context, Locale.getDefault())
+//
+//                         latitude =    location.latitude.toString()
+//                         longitude=  location.longitude.toString()
+//                         accuracy  = location.accuracy.toString()
+//
+//                        return@addOnCompleteListener
+//
+//
+//                    }
             }
 
-          return "latitude: $latitude,  longitude: $longitude, accuracy: $accuracy"
     }
 
     // Kernel Arch

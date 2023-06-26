@@ -73,6 +73,9 @@
             android:name=".wallpaper.WallpaperInformationActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity
+            android:name=".userapps.InstalledUserAppsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
     </application>
-
 </manifest>

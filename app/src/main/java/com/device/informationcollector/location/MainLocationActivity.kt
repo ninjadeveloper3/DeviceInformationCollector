@@ -5,20 +5,25 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
+import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.device.deviceinformationlibrary.DataCollection
 import com.device.informationcollector.databinding.ActivityMainLocationBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+
 import java.util.*
 
 class MainLocationActivity : AppCompatActivity() {
+
 
     private lateinit var mainBinding: ActivityMainLocationBinding
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
@@ -29,55 +34,49 @@ class MainLocationActivity : AppCompatActivity() {
         mainBinding = ActivityMainLocationBinding.inflate(layoutInflater)
         setContentView(mainBinding.root)
         initViews()
+        mainBinding.btnLocation.setOnClickListener {
+            getLocation()
+        }
     }
 
-    private fun initViews() {
+    private fun initViews(){
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        getLocation()
+    }
+
+
+
+    @SuppressLint("MissingPermission", "SetTextI18n")
+    private fun getLocation() {
         if (checkPermissions()) {
             if (isLocationEnabled()) {
-                val location = DataCollection.getLocation(this, mFusedLocationClient)
+                mFusedLocationClient.lastLocation.addOnCompleteListener(this) { task ->
+                    val location: Location? = task.result
+                    if (location != null) {
+                        val geocoder = Geocoder(this, Locale.getDefault())
+                        mainBinding.tvAccuracy.text = "Accuracy\n${location.accuracy}"
+                        Log.d("locationAccuracy", location.accuracy.toString())
+                        val list: List<Address> =
+                            geocoder.getFromLocation(location.latitude, location.longitude, 1)!!
+                        Log.d("lattiudeee", list[0].latitude.toString())
+                        mainBinding.apply {
+                            tvLatitude.text = "Latitude\n${list[0].latitude}"
+                            tvLongitude.text = "Longitude\n${list[0].longitude}"
+                            tvCountryName.text = "Country Name\n${list[0].countryName}"
+                            tvLocality.text = "Locality\n${list[0].locality}"
+                            tvAddress.text = "Address\n${list[0].getAddressLine(0)}"
+                        }
+                    }
+                }
             } else {
                 Toast.makeText(this, "Please turn on location", Toast.LENGTH_LONG).show()
                 val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivity(intent)
-
             }
         } else {
             requestPermissions()
         }
-
     }
-
-
-//        @SuppressLint("MissingPermission", "SetTextI18n")
-//    private fun getLocation() {
-//        if (checkPermissions()) {
-//            if (isLocationEnabled()) {
-//                mFusedLocationClient.lastLocation.addOnCompleteListener(this) { task ->
-//                    val location: Location? = task.result
-//                    if (location != null) {
-//                        val geocoder = Geocoder(this, Locale.getDefault())
-//                        val list: List<Address> =
-//                            geocoder.getFromLocation(location.latitude, location.longitude, 1)!!
-//                        Log.d("lattiudeee", list[0].latitude.toString())
-//                        mainBinding.apply {
-//                            tvLatitude.text = "Latitude\n${list[0].latitude}"
-//                            tvLongitude.text = "Longitude\n${list[0].longitude}"
-//                            tvCountryName.text = "Country Name\n${list[0].countryName}"
-//                            tvLocality.text = "Locality\n${list[0].locality}"
-//                            tvAddress.text = "Address\n${list[0].getAddressLine(0)}"
-//                        }
-//                    }
-//                }
-//            } else {
-//                Toast.makeText(this, "Please turn on location", Toast.LENGTH_LONG).show()
-//                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-//                startActivity(intent)
-//            }
-//        } else {
-//            requestPermissions()
-//        }
-//    }
 
     private fun isLocationEnabled(): Boolean {
         val locationManager: LocationManager =
@@ -121,7 +120,7 @@ class MainLocationActivity : AppCompatActivity() {
     ) {
         if (requestCode == permissionId) {
             if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                mainBinding.tvLatitude.text = DataCollection.getLocation(this, mFusedLocationClient)
+                getLocation()
             }
         }
     }
@@ -139,30 +138,30 @@ class MainLocationActivity : AppCompatActivity() {
                 android.Manifest.permission.ACCESS_COARSE_LOCATION
             )
             == PackageManager.PERMISSION_GRANTED
-        ) {
-            mainBinding.tvLatitude.text = DataCollection.getLocation(this, mFusedLocationClient)
+        ){
+            latLongValues()
         }
     }
 
-//    @SuppressLint("MissingPermission")
-//    private fun latLongValues(){
-//        if (isLocationEnabled()) {
-//            mFusedLocationClient.lastLocation.addOnCompleteListener(this) { task ->
-//                val location: Location? = task.result
-//                if (location != null) {
-//                    val geocoder = Geocoder(this, Locale.getDefault())
-//                    val list: List<Address> =
-//                        geocoder.getFromLocation(location.latitude, location.longitude, 1)!!
-//                    Log.d("lattiudeee", list[0].latitude.toString())
-//                    mainBinding.apply {
-//                        tvLatitude.text = "Latitude\n${list[0].latitude}"
-//                        tvLongitude.text = "Longitude\n${list[0].longitude}"
-//                        tvCountryName.text = "Country Name\n${list[0].countryName}"
-//                        tvLocality.text = "Locality\n${list[0].locality}"
-//                        tvAddress.text = "Address\n${list[0].getAddressLine(0)}"
-//                    }
-//                }
-//            }
-//        }
-//    }
+    @SuppressLint("MissingPermission")
+    private fun latLongValues(){
+        if (isLocationEnabled()) {
+            mFusedLocationClient.lastLocation.addOnCompleteListener(this) { task ->
+                val location: Location? = task.result
+                if (location != null) {
+                    val geocoder = Geocoder(this, Locale.getDefault())
+                    val list: List<Address> =
+                        geocoder.getFromLocation(location.latitude, location.longitude, 1)!!
+                    Log.d("lattiudeee", list[0].latitude.toString())
+                    mainBinding.apply {
+                        tvLatitude.text = "Latitude\n${list[0].latitude}"
+                        tvLongitude.text = "Longitude\n${list[0].longitude}"
+                        tvCountryName.text = "Country Name\n${list[0].countryName}"
+                        tvLocality.text = "Locality\n${list[0].locality}"
+                        tvAddress.text = "Address\n${list[0].getAddressLine(0)}"
+                    }
+                }
+            }
+        }
+    }
 }
