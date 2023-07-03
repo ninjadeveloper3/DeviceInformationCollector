@@ -104,7 +104,8 @@ You can use the "DataCollection" class, which contains all the functions related
 To see an example of how to use this library and call functions using the "DataCollection" class, please refer to the code snippet below
 <br/>
 
-![image](https://github.com/ninjadeveloper3/DeviceInformationCollector/assets/115450012/d1835e73-da64-48c0-bb8e-f190f7f8db71)
+![image](https://github.com/ninjadeveloper3/DeviceInformationCollector/assets/115450012/fb1ecc18-6b24-4b65-90ec-8eee21c82976)
+
 <br/>
 
 
