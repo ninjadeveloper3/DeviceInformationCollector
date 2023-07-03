@@ -2,8 +2,20 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'maven-publish'
-
 }
+
+//publications {
+//    release(MavenPublication) {
+//        groupId = 'com.github.NinjaDeveloper3'
+//        artifactId = 'device_information_collector'
+//        version = "1.1.1"
+//        from components.release
+//        pom {
+//            description = 'data collection library'
+//        }
+//    }
+//}
+
 android {
     namespace 'com.device.deviceinformationlibrary'
     compileSdk 33
@@ -18,7 +30,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -29,6 +41,8 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+
 }
 
 dependencies {
@@ -41,6 +55,32 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
+
+afterEvaluate(){
+    publishing{
+        publications{
+            release(MavenPublication){
+                from components.release
+
+
+                groupId = 'com.github.ninjadeveloper3'
+                artifactId = 'device_information_collector'
+                version= "1.1.2"
+            }
+        }
+    }
+}
+
+//publishing{
+//    publications{
+//        release(MavenPublication){
+//            from components.release
+//            groupId = 'com.github.NinjaDeveloper3'
+//            artifactId = 'device_information_collector'
+//            version= "1.1.1"
+//        }
+//    }
+//}
 //
 //
 //afterEvaluate{
@@ -55,18 +95,18 @@ dependencies {
 //        }
 //    }
 //}
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                groupId = 'comgithubNinjadeveloper3'
-                artifactId = 'device_information_collector'
-                version = "1.1.0"
-                from components.release
-                pom {
-                    description = 'data collection library'
-                }
-            }
-        }
-    }
-}
+//afterEvaluate {
+//    publishing {
+//        publications {
+//            release(MavenPublication) {
+//                groupId = 'comgithubNinjadeveloper3'
+//                artifactId = 'device_information_collector'
+//                version = "1.1.0"
+//                from components.release
+//                pom {
+//                    description = 'data collection library'
+//                }
+//            }
+//        }
+//    }
+//}

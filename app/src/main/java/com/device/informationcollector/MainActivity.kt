@@ -52,19 +52,19 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.contactList.setOnClickListener {
-            val intent= Intent(this, ContactListActivity::class.java)
+            val intent = Intent(this, ContactListActivity::class.java)
             startActivity(intent)
         }
         binding.wallpaperInformationTv.setOnClickListener {
-            val intent= Intent(this, WallpaperInformationActivity::class.java)
+            val intent = Intent(this, WallpaperInformationActivity::class.java)
             startActivity(intent)
         }
         binding.installedUserApps.setOnClickListener {
-            val intent= Intent(this, InstalledUserAppsActivity::class.java)
+            val intent = Intent(this, InstalledUserAppsActivity::class.java)
             startActivity(intent)
         }
         binding.getLocationButton.setOnClickListener {
-            val intent= Intent(this, MainLocationActivity::class.java)
+            val intent = Intent(this, MainLocationActivity::class.java)
             startActivity(intent)
         }
     }
