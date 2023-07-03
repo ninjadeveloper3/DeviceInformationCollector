@@ -7,6 +7,7 @@ import android.view.Surface
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.device.deviceinformationlibrary.DataCollection
+import com.device.deviceinformationlibrary.getTimeStamp
 import com.device.informationcollector.contact.ContactListActivity
 import com.device.informationcollector.databinding.ActivityMainBinding
 import com.device.informationcollector.dialog.DialogUtils
