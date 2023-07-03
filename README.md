@@ -54,13 +54,19 @@ allprojects
 <br/>
 {
 <br/>
-		repositories {
-			...
+repositories {
+   ...
    <br/>
-			maven { url 'https://jitpack.io' }
-		}
+   maven { 
+   
+   url 'https://jitpack.io' 
+   
+   }
+		
+  }
   <br/>
-	}
+  
+}
 <br/>
 <br/>
  ...............
@@ -77,11 +83,30 @@ implementation 'com.github.ninjadeveloper3:DeviceInformationCollector:Tag'
 # OR
 <br/>
 <br/>
+
 -> import module by adding this line in dependencies
+
 <br/>
+
 implementation project(path: ':deviceinformationlibrary')
 <br/>
 </p>
+
+<h3 align="center">How to Use</h3>
+
+You can use the "DataCollection" class, which contains all the functions related to device information. For example, to get the device name, you can use the following function:
+<br/>
+
+![image](https://github.com/ninjadeveloper3/DeviceInformationCollector/assets/115450012/8683a4e7-7283-467c-8081-8381c29c2edb)
+
+<br/>
+
+To see an example of how to use this library and call functions using the "DataCollection" class, please refer to the code snippet below
+<br/>
+
+![image](https://github.com/ninjadeveloper3/DeviceInformationCollector/assets/115450012/d1835e73-da64-48c0-bb8e-f190f7f8db71)
+<br/>
+
 
 
 # Output
@@ -102,3 +127,4 @@ implementation project(path: ':deviceinformationlibrary')
 
 
 [![](https://jitpack.io/v/ninjadeveloper3/DeviceInformationCollector.svg)](https://jitpack.io/#ninjadeveloper3/DeviceInformationCollector)
+
