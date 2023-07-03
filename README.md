@@ -50,58 +50,38 @@ device data collector
 -> Add it in your root build.gradle at the end of repositories:
 
 
-
 allprojects 
 <br/>
 {
 <br/>
-<br/>
 		repositories {
 			...
+   <br/>
 			maven { url 'https://jitpack.io' }
 		}
   <br/>
-  <br/>
 	}
-
-
-<br/>
-<br/>
 <br/>
 <br/>
  ...............
 <br/>
-
  -> Step 2. Add the dependency
-
 <br/>
 <br/>
 implementation 'com.github.ninjadeveloper3:DeviceInformationCollector:Tag'
-
-<br/>
 <br/>
 <br/>
 ..............
 <br/>
 <br/>
-<br/>
 # OR
 <br/>
 <br/>
-<br/>
-
 -> import module by adding this line in dependencies
-
 <br/>
-<br/>
-<br/>
-
 implementation project(path: ':deviceinformationlibrary')
-
 <br/>
 </p>
-
-
 
 
 # Output
