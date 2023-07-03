@@ -43,6 +43,8 @@ device data collector
 
 # How to integrate library in your project
 
+<p align="left"> 
+
 -> Step 1. Add the JitPack repository to your build file
 
 -> Add it in your root build.gradle at the end of repositories:
@@ -75,8 +77,10 @@ implementation 'com.github.ninjadeveloper3:DeviceInformationCollector:Tag'
 
 implementation project(path: ':deviceinformationlibrary')
 
+</p>
 
-......................................
+
+
 
 # Output
 
